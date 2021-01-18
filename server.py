@@ -1,6 +1,7 @@
 import socket
 import time
 import threading
+import transport
 
 class StreamServer:
     
@@ -18,9 +19,12 @@ class StreamServer:
         with self.server_socket:
             while self.active.is_set():
                 msg = f"Hello world, {time.time()}"
-                self.server_socket.sendto(msg.encode("utf-8"), ("<broadcast>", self.serving_port))
+                transport.redundant_broadcast(
+                    msg.encode("utf-8"),
+                    self.server_socket,
+                    self.serving_port
+                )
                 time.sleep(1)
-    
 
     def start(self):
         try:

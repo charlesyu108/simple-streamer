@@ -2,6 +2,7 @@ import ring
 import socket
 import time
 import threading
+import transport
 
 
 class StreamClient:
@@ -13,14 +14,14 @@ class StreamClient:
 
         self.listening_port = listening_port
         self.client_socket = client_socket
-        self.buffer = ring.RingBuffer()
+        self.buffer = ring.DedupeRingBuffer()
         self.active = threading.Event()
 
     def listen(self):
         with self.client_socket:
             self.client_socket.bind(("", self.listening_port))
             while self.active.is_set():
-                data, addr = self.client_socket.recvfrom(1024)
+                data, addr = self.client_socket.recvfrom(transport.CHUNK_SIZE)
                 if data:
                     self.buffer.add(data)
                 time.sleep(1)

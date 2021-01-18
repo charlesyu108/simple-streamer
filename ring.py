@@ -34,6 +34,22 @@ class RingBuffer:
     def is_empty(self):
         return self._size == 0
 
+
+class DedupeRingBuffer(RingBuffer):
+    """
+    A ring buffer that deduplicates incoming messages on add.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Hacky - internally use a raw ring buffer to use for deduplication
+        self.dedupe_buffer = RingBuffer(max_size=100)
+
+    def add(self, value):
+        if value not in self.dedupe_buffer._buffer:
+            self.dedupe_buffer.add(value)
+            super().add(value)
+
 ##############################################
 # Exceptions
 ##############################################
