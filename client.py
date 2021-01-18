@@ -1,4 +1,5 @@
 import socket
+import time
 import threading
 
 class StreamClient:
@@ -13,7 +14,11 @@ class StreamClient:
 
 
     def listen(self):
-        pass
+        while True:
+            data, addr = self.client_socket.recvfrom(1024)
+            if data:
+                print(data)
+            time.sleep(1)
     
 
     def start(self):

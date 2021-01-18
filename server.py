@@ -1,4 +1,5 @@
 import socket
+import time
 import threading
 
 class StreamServer:
@@ -13,7 +14,9 @@ class StreamServer:
 
 
     def broadcast(self):
-        pass
+        while True:
+            self.server_socket.sendto(b"Hello world", ("<broadcast>", self.serving_port))
+            time.sleep(1)
     
 
     def start(self):
