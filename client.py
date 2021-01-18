@@ -19,6 +19,6 @@ class StreamClient:
     def start(self):
         with self.client_socket as s:
             s.bind(("", self.listening_port))
-            listening_thread = threading.Thread(self.listen)
+            listening_thread = threading.Thread(target=self.listen)
             listening_thread.start()
             listening_thread.join()

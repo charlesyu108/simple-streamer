@@ -18,6 +18,6 @@ class StreamServer:
 
     def start(self):
         with self.server_socket as s:
-            broadcasting_thread = threading.Thread(self.broadcast)
+            broadcasting_thread = threading.Thread(target=self.broadcast)
             broadcasting_thread.start()
             broadcasting_thread.join()
