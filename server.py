@@ -11,16 +11,22 @@ class StreamServer:
 
         self.serving_port = serving_port
         self.server_socket = server_socket
+        self.active = threading.Event()
 
 
     def broadcast(self):
-        while True:
-            self.server_socket.sendto(b"Hello world", ("<broadcast>", self.serving_port))
-            time.sleep(1)
+        with self.server_socket:
+            while self.active.is_set():
+                msg = f"Hello world, {time.time()}"
+                self.server_socket.sendto(msg.encode("utf-8"), ("<broadcast>", self.serving_port))
+                time.sleep(1)
     
 
     def start(self):
-        with self.server_socket as s:
+        try:
+            self.active.set()
             broadcasting_thread = threading.Thread(target=self.broadcast)
             broadcasting_thread.start()
             broadcasting_thread.join()
+        finally:
+            self.active.clear()

@@ -1,6 +1,8 @@
+import ring
 import socket
 import time
 import threading
+
 
 class StreamClient:
     
@@ -11,19 +13,40 @@ class StreamClient:
 
         self.listening_port = listening_port
         self.client_socket = client_socket
-
+        self.buffer = ring.RingBuffer()
+        self.active = threading.Event()
 
     def listen(self):
-        while True:
-            data, addr = self.client_socket.recvfrom(1024)
-            if data:
+        with self.client_socket:
+            self.client_socket.bind(("", self.listening_port))
+            while self.active.is_set():
+                data, addr = self.client_socket.recvfrom(1024)
+                if data:
+                    self.buffer.add(data)
+                time.sleep(1)
+
+    def play(self):
+        while self.active.is_set():
+            try:
+                data = self.buffer.get()
                 print(data)
+            except ring.EmptyBufferException:
+                pass
             time.sleep(1)
     
 
     def start(self):
-        with self.client_socket as s:
-            s.bind(("", self.listening_port))
+        try:
             listening_thread = threading.Thread(target=self.listen)
+            playing_thread = threading.Thread(target=self.play)
+
+            self.active.set()
+        
             listening_thread.start()
+            playing_thread.start()
+
+            playing_thread.join()
             listening_thread.join()
+        finally:
+            self.active.clear()
+
