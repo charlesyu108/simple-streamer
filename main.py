@@ -34,7 +34,6 @@ class ServerImplementation(server.StreamServer):
             while self.active.is_set():
                 data = self.input_audio_stream.read(frames_per_packet)
                 self.server_socket.sendto(data, ("<broadcast>", self.serving_port))
-                time.sleep(sleep_time)
 
 class ClientImplementation(client.StreamClient):
     def __init__(self, *args, **kwargs):
@@ -46,18 +45,12 @@ class ClientImplementation(client.StreamClient):
             channels=Config.n_channels,
             output=True,
         )
-        self.frames_ready = []
 
     def consume_from_buffer(self):
         while self.active.is_set():
             try:
                 data = self.buffer.get()
-                self.frames_ready.append(data)
-                frames_per_packet = transport.CHUNK_SIZE//Config.framesize
-                if len(self.frames_ready) > Config.framerate//frames_per_packet:
-                    to_play = self.frames_ready
-                    self.frames_ready = []
-                    self.output_audio_stream.write(b"".join(to_play))
+                self.output_audio_stream.write(data)
             except ring.EmptyBufferException:
                 pass
         self.output_audio_stream.stop_stream()
