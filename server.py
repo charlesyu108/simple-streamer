@@ -24,7 +24,6 @@ class StreamServer:
                     self.server_socket,
                     self.serving_port
                 )
-                time.sleep(1)
 
     def start(self):
         try:

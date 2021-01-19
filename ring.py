@@ -34,6 +34,9 @@ class RingBuffer:
     def is_empty(self):
         return self._size == 0
 
+    def __len__(self):
+        return self._size
+
 
 class DedupeRingBuffer(RingBuffer):
     """
