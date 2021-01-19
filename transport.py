@@ -1,7 +1,7 @@
 import hashlib
 
-CHUNK_SIZE = 1024
-PACKET_SEND_ATTEMPTS = 5
+CHUNK_SIZE = 512
+PACKET_SEND_ATTEMPTS = 2
 
 def broadcast(data: bytes, socket_, port):
     socket_.sendto(data, ("<broadcast>", port))

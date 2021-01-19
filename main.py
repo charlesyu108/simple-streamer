@@ -1,4 +1,4 @@
-# Scratch to preserve other files.
+# Sample scratch implementation of an audio-broadcast
 import sys
 import server
 import client
@@ -6,13 +6,13 @@ import pyaudio
 import wave
 import transport
 import time
+import threading
 import ring
-import numpy as np
 
 class Config:
-    format=pyaudio.paInt16
-    n_channels=2
-    framerate=4000
+    format = pyaudio.paInt16
+    n_channels = 2
+    framerate = 44100
     framesize = 4
 
 
@@ -30,7 +30,6 @@ class ServerImplementation(server.StreamServer):
     def broadcast(self):
         with self.server_socket:
             frames_per_packet = transport.CHUNK_SIZE//Config.framesize
-            sleep_time = 1 / Config.framerate / frames_per_packet
             while self.active.is_set():
                 data = self.input_audio_stream.read(frames_per_packet)
                 self.server_socket.sendto(data, ("<broadcast>", self.serving_port))
@@ -57,7 +56,6 @@ class ClientImplementation(client.StreamClient):
         self.output_audio_stream.close()
         self.pa.terminate()
 
-
 def start_server():
     print("Starting server...")
     s = ServerImplementation(8089)
@@ -65,7 +63,7 @@ def start_server():
 
 def start_client():
     print("Starting client...")
-    c = ClientImplementation(8089, buffer_size=10000)
+    c = ClientImplementation(8089, buffer_size=1000)
     c.start()
 
 
@@ -76,4 +74,4 @@ if __name__ == "__main__":
     elif run_opt == "client":
         start_client()
     else:
-        raise SystemError("Unknonw option passed.")
+        raise SystemError("Unknown option passed.")

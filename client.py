@@ -61,4 +61,6 @@ class StreamClient:
 
         finally:
             self.active.clear()
+            self.client_socket.close()
+
 

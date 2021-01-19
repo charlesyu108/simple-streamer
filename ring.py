@@ -46,7 +46,7 @@ class DedupeRingBuffer(RingBuffer):
         super().__init__(*args, **kwargs)
 
         # Hacky - internally use a raw ring buffer to use for deduplication
-        self.dedupe_buffer = RingBuffer(max_size=100)
+        self.dedupe_buffer = RingBuffer(max_size=10000)
 
     def add(self, value):
         if value not in self.dedupe_buffer._buffer:
