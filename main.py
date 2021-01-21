@@ -12,7 +12,7 @@ import ring
 class Config:
     format = pyaudio.paInt16
     n_channels = 1
-    framerate = 44100
+    framerate = 4000 # Reduced this from 41000
     framesize = 4
 
 
@@ -43,7 +43,8 @@ class ClientImplementation(client.StreamClient):
             rate=Config.framerate,
             channels=Config.n_channels,
             output=True,
-            stream_callback=self.callback
+            stream_callback=self.callback,
+            frames_per_buffer=transport.CHUNK_SIZE//Config.framesize
         )
 
     def consume_from_buffer(self):
