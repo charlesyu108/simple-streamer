@@ -46,14 +46,17 @@ class ClientImplementation(client.StreamClient):
             stream_callback=self.callback,
             frames_per_buffer=transport.CHUNK_SIZE//Config.framesize
         )
+        self.output_audio_stream.start_stream()
+
 
     def consume_from_buffer(self):
-        self.output_audio_stream.start_stream()
-        while self.active.is_set() and self.output_audio_stream.is_active():
-            time.sleep(5)
-        self.output_audio_stream.stop_stream()
-        self.output_audio_stream.close()
-        self.pa.terminate()
+        # self.output_audio_stream.start_stream()
+        return
+        # while self.active.is_set() and self.output_audio_stream.is_active():
+        #     time.sleep(5)
+        # self.output_audio_stream.stop_stream()
+        # self.output_audio_stream.close()
+        # self.pa.terminate()
 
     def callback(self, in_data, frame_count, time_info, status):
         frames_per_packet = transport.CHUNK_SIZE//Config.framesize
@@ -77,6 +80,9 @@ def start_client():
     print("Starting client...")
     c = ClientImplementation(8089)
     c.start()
+    self.output_audio_stream.stop_stream()
+    self.output_audio_stream.close()
+    self.pa.terminate()
 
 
 if __name__ == "__main__":
