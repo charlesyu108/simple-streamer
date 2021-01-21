@@ -11,7 +11,7 @@ import ring
 
 class Config:
     format = pyaudio.paInt16
-    n_channels = 2
+    n_channels = 1
     framerate = 44100
     framesize = 4
 
@@ -43,18 +43,27 @@ class ClientImplementation(client.StreamClient):
             rate=Config.framerate,
             channels=Config.n_channels,
             output=True,
+            stream_callback=self.callback
         )
 
     def consume_from_buffer(self):
-        while self.active.is_set():
-            try:
-                data = self.buffer.get()
-                self.output_audio_stream.write(data)
-            except ring.EmptyBufferException:
-                pass
+        self.output_audio_stream.start_stream()
+        while self.active.is_set() and self.output_audio_stream.is_active():
+            time.sleep(0.1)
         self.output_audio_stream.stop_stream()
         self.output_audio_stream.close()
         self.pa.terminate()
+
+    def callback(self, in_data, frame_count, time_info, status):
+        frames_per_packet = transport.CHUNK_SIZE//Config.framesize
+        data_out = b""
+        for i in range(0, frame_count, frames_per_packet):
+            try:
+                data = self.buffer.get()
+                data_out += data
+            except ring.EmptyBufferException:
+                pass
+        return (data_out, pyaudio.paContinue)
 
 def start_server():
     print("Starting server...")
@@ -63,7 +72,7 @@ def start_server():
 
 def start_client():
     print("Starting client...")
-    c = ClientImplementation(8089, buffer_size=1000)
+    c = ClientImplementation(8089, buffer_size=100000)
     c.start()
 
 
