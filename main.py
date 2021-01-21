@@ -50,7 +50,7 @@ class ClientImplementation(client.StreamClient):
     def consume_from_buffer(self):
         self.output_audio_stream.start_stream()
         while self.active.is_set() and self.output_audio_stream.is_active():
-            time.sleep(0.1)
+            time.sleep(5)
         self.output_audio_stream.stop_stream()
         self.output_audio_stream.close()
         self.pa.terminate()
@@ -73,7 +73,7 @@ def start_server():
 
 def start_client():
     print("Starting client...")
-    c = ClientImplementation(8089, buffer_size=100000)
+    c = ClientImplementation(8089)
     c.start()
 
 
