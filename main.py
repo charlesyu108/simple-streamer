@@ -58,12 +58,14 @@ class ClientImplementation(client.StreamClient):
     def callback(self, in_data, frame_count, time_info, status):
         frames_per_packet = transport.CHUNK_SIZE//Config.framesize
         data_out = b""
-        for i in range(0, frame_count, frames_per_packet):
+        frames_read = 0
+        while frames_read < frames_per_packet:
             try:
                 data = self.buffer.get()
                 data_out += data
+                frames_read += frames_per_packet
             except ring.EmptyBufferException:
-                pass
+                continue
         return (data_out, pyaudio.paContinue)
 
 def start_server():
